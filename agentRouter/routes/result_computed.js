@@ -1,4 +1,4 @@
-import { create as createSubject } from '@liquid-bricks/shared-providers/subject/create/basic'
+import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
 
 export const path = {
   context: 'component-agent',

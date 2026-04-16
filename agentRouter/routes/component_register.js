@@ -1,4 +1,4 @@
-import { create as createSubject } from '@liquid-bricks/shared-providers/subject/create/basic'
+import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
 import { Codes } from '../../codes.js'
 
 export const path = {
@@ -41,7 +41,7 @@ async function publishComponentRegistration({ message, rootCtx: { natsContext } 
 
   const subject = createSubject()
     .set({ env, ns, tenant, version, id })
-    .context('component-dispatcher')
+    .context('gw-ws-components')
     .channel('cmd')
     .entity('component')
     .action('register')

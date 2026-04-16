@@ -1,0 +1,22 @@
+{
+  "name": "@liquid-bricks/gw-ws-components",
+  "version": "1.0.0",
+  "description": "Gateway WebSocket gw-ws-components",
+  "main": "./index.js",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./gateway": "./index.js"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "test": "clear && node test/run.js"
+  },
+  "dependencies": {
+    "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#345a6a5d748e253bee39e3dd1ca33719a35f9ad3",
+    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#5958dab01e5934267773f47aa280337547f52474",
+    "@nats-io/jetstream": "^3.0.2",
+    "ws": "^8.18.3"
+  },
+  "license": "ISC"
+}

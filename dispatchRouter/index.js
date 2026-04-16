@@ -1,4 +1,4 @@
-import router from "@liquid-bricks/shared-providers/subject/router";
+import router from "@liquid-bricks/lib-nats-subject/router";
 import { path as computeResultPath, spec as computeResultSpec } from './routes/compute_result.js'
 import { Codes } from '../codes.js'
 
@@ -19,12 +19,12 @@ export function createRouter({
       }
     })
     .error(({ error, message, rootCtx: { diagnostics } }) => {
-      diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'component dispatcher router error', { error, subject: message?.subject })
+      diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'gw-ws-components router error', { error, subject: message?.subject })
       try { message?.ack?.() } catch (_) { /* ignore */ }
       return { status: 'errored' }
     })
     .abort(({ message, rootCtx: { diagnostics } }) => {
-      diagnostics.debug('component dispatcher router aborted', { subject: message?.subject })
+      diagnostics.debug('gw-ws-components router aborted', { subject: message?.subject })
       try { message?.ack?.() } catch (_) { /* ignore */ }
       return { status: 'aborted' }
     })
