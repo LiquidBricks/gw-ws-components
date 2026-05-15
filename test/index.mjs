@@ -63,6 +63,7 @@ async function startDispatcher() {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
   const dispatcher = await gateway({
     server,
+    path: '/componentAgent',
     streamName: 'COMPONENT_EXECUTION_STREAM',
     natsContext: createNatsContextStub(),
     diagnostics,

@@ -8,12 +8,14 @@ const consumerName = 'gwWsComponentsConsumer'
 
 export async function gateway({
   server,
+  path,
   streamName,
   natsContext,
   diagnostics: d,
 }) {
   const diagnostics = d.child({ route: 'gw-ws-components' })
-  const wss = new WebSocketServer({ server, path: '/componentAgent' });
+  diagnostics.require(path, Codes.PRECONDITION_REQUIRED, 'path is required', { field: 'path' });
+  const wss = new WebSocketServer({ server, path });
   const connectionRegistry = new Map();
 
   diagnostics.require(wss, Codes.PRECONDITION_REQUIRED, 'wss is required', { field: 'wss' });
