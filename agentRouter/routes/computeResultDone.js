@@ -4,7 +4,7 @@ export const path = {
   context: 'component-agent',
   channel: 'evt',
   entity: 'component',
-  action: 'result_computed',
+  action: 'computeResultDone',
 }
 
 export const spec = {
@@ -16,7 +16,7 @@ export const spec = {
       .ns('component-service')
       .entity('componentInstance')
       .channel('evt')
-      .action('result_computed')
+      .action('computeResultDone')
       .version('v1')
 
     await natsContext.publish(

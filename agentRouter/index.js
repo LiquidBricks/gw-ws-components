@@ -1,6 +1,6 @@
 import router from "@liquid-bricks/lib-nats-subject/router";
 import { path as componentRegisterPath, spec as componentRegisterSpec } from './routes/component_register.js'
-import { path as resultComputedPath, spec as resultComputedSpec } from './routes/result_computed.js'
+import { path as computeResultDonePath, spec as computeResultDoneSpec } from './routes/computeResultDone.js'
 import { Codes } from '../codes.js'
 
 export function createRouter({
@@ -13,7 +13,7 @@ export function createRouter({
     context: { natsContext, diagnostics, connectionRegistry },
   })
     .route(componentRegisterPath, componentRegisterSpec)
-    .route(resultComputedPath, resultComputedSpec)
+    .route(computeResultDonePath, computeResultDoneSpec)
     .default({
       handler: ({ message, rootCtx: { diagnostics, connectionRegistry } }) => {
         diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'No handler for subject', { subject: message?.subject })

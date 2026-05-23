@@ -57,7 +57,7 @@ async function publishComputedResult({ scope, rootCtx: { natsContext, diagnostic
   //   .ns('component-service')
   //   .entity('componentInstance')
   //   .channel('evt')
-  //   .action(`result_computed`)
+  //   .action(`computeResultDone`)
   //   .version('v1');
 
   // await natsContext.publish(
