@@ -64,7 +64,7 @@ async function startDispatcher() {
   const dispatcher = await gateway({
     server,
     path: '/componentAgent',
-    streamName: 'COMPONENT_EXECUTION_STREAM',
+    streamName: 'COMPONENT_SERVICE_STREAM',
     natsContext: createNatsContextStub(),
     diagnostics,
   })
