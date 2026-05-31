@@ -7,11 +7,12 @@ import { gateway } from '../index.js'
 import { Codes } from '../codes.js'
 import { spec as componentRegisterSpec } from '../agentRouter/routes/component_register.js'
 import { spec as computeResultSpec } from '../dispatchRouter/routes/compute_result.js'
+import { createRouter as createDispatchRouter } from '../dispatchRouter/index.js'
 
 const DEFAULT_TIMEOUT = 5000
 
 function createDiagnosticsStub() {
-  const calls = { info: [], warn: [], require: [], debug: [] }
+  const calls = { info: [], warn: [], require: [], debug: [], invariant: [], error: [] }
   class DiagnosticError extends Error {
     constructor(message, code) {
       super(message)
@@ -25,6 +26,14 @@ function createDiagnosticsStub() {
     info(...args) { calls.info.push(args) },
     warn(...args) { calls.warn.push(args) },
     debug(...args) { calls.debug.push(args) },
+    invariant(value, code, message, meta) {
+      calls.invariant.push({ value, code, message, meta })
+      if (!value) throw new DiagnosticError(message, code)
+    },
+    error(code, message, meta) {
+      calls.error.push({ code, message, meta })
+      return new DiagnosticError(message, code)
+    },
     require(value, code, message, meta) {
       calls.require.push({ value, code, message, meta })
       if (!value) throw new DiagnosticError(message, code)
@@ -253,6 +262,41 @@ test('compute_result publishes via the provider registered for the component has
     instanceId: 'instance-1',
     deps: { foo: 'bar' },
   })
+})
+
+test('dispatch router does not warn when compute_result has no provider registered', async () => {
+  const diagnostics = createDiagnosticsStub()
+  const dispatch = createDispatchRouter({
+    natsContext: {},
+    diagnostics,
+    connectionRegistry: new Map(),
+  })
+  const subject = 'prod.component-service._._.exec.component.compute_result.v1._'
+  const requestMessage = {
+    subject,
+    json() {
+      return {
+        data: {
+          instanceId: 'instance-1',
+          deps: {},
+          componentHash: 'hash-missing',
+          name: 'TestComponent',
+          type: 'widget',
+        },
+      }
+    },
+  }
+
+  await dispatch.request({ subject, message: requestMessage })
+
+  assert.ok(
+    diagnostics.calls.require.some((call) => (
+      call.code === Codes.PRECONDITION_REQUIRED &&
+      call.message === 'No component provider registered for requested hash'
+    ))
+  )
+  assert.equal(diagnostics.calls.warn.length, 0)
+  assert.equal(diagnostics.calls.error.length, 0)
 })
 
 test('compute_result validation fails when no provider has the requested hash', () => {

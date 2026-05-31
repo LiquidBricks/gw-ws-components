@@ -13,18 +13,26 @@ export function createRouter({
   })
     .route(computeResultPath, computeResultSpec)
     .default({
-      handler: ({ message, rootCtx: { diagnostics, connectionRegistry } }) => {
-        diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'No handler for subject', { subject: message?.subject })
-        try { message?.ack?.() } catch (_) { /* ignore */ }
+      handler: async ({ message, rootCtx: { diagnostics } }) => {
+        diagnostics.invariant(
+          message.term(`No handler for subject: ${message.subject}`) ?? false,
+          Codes.ROUTER_UNKNOWN_SUBJECT,
+          `No handler for subject: ${message.subject}`,
+          { subject: message.subject, message: message?.json?.() }
+        )
       }
     })
-    .error(({ error, message, rootCtx: { diagnostics } }) => {
-      diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'gw-ws-components router error', { error, subject: message?.subject })
-      try { message?.ack?.() } catch (_) { /* ignore */ }
-      return { status: 'errored' }
+    .error(({ error, rootCtx: { diagnostics } }, ...rest) => {
+      if (error instanceof diagnostics.DiagnosticError) {
+        return
+      }
+      throw diagnostics.error(
+        Codes.ROUTER_HANDLER_ERROR,
+        'gw-ws-components router error',
+        { error, rest },
+      )
     })
-    .abort(({ message, rootCtx: { diagnostics } }) => {
-      diagnostics.debug('gw-ws-components router aborted', { subject: message?.subject })
+    .abort(({ reason, stage, message, rootCtx: { diagnostics } }) => {
       try { message?.ack?.() } catch (_) { /* ignore */ }
       return { status: 'aborted' }
     })
