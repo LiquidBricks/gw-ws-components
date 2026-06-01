@@ -1,3 +1,5 @@
+import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic';
+import { randomUUID } from 'node:crypto';
 import { AckPolicy, DeliverPolicy } from "@nats-io/jetstream";
 import { WebSocketServer } from 'ws';
 import { Codes } from './codes.js';
@@ -35,11 +37,11 @@ export async function gateway({
     })
   }
 
-  let connectionCounter = 0;
-  wss.on('connection', (ws, req) => {
-    const connectionId = ++connectionCounter;
-    const connectionDiagnostics = diagnostics.child({ connectionId });
-    connectionRegistry.set(connectionId, {
+  wss.on('connection', async (ws, req) => {
+    const agentID = randomUUID();
+    const connectionDiagnostics = diagnostics.child({ agentID });
+    connectionRegistry.set(agentID, {
+      agentID,
       publish: (subject, data) => {
         const payload = JSON.stringify({ subject, data });
         ws.send(payload);
@@ -52,7 +54,7 @@ export async function gateway({
       let parsed;
 
       try {
-        parsed = { ...JSON.parse(raw), connectionId };
+        parsed = { ...JSON.parse(raw), agentID };
       } catch (error) {
         connectionDiagnostics.warn(false, Codes.PRECONDITION_INVALID,
           'gw-ws-components received invalid JSON', {
@@ -76,7 +78,7 @@ export async function gateway({
     });
 
     ws.on('close', () => {
-      connectionRegistry.delete(connectionId);
+      connectionRegistry.delete(agentID);
       connectionDiagnostics.info('componentAgent disconnected');
     });
 
@@ -87,10 +89,31 @@ export async function gateway({
       { error: err?.message ?? String(err) },
     ));
 
+    try {
+      await publishComponentAgentRegistration({ natsContext, agentID });
+    } catch (error) {
+      connectionDiagnostics.warn(false, Codes.PRECONDITION_INVALID, 'componentAgent registration publish failed', { error: error?.message ?? String(error) });
+    }
+
     ws.send(JSON.stringify({ ok: true, message: 'gw-ws-components connected' }));
   });
 
   return { wss, connectionRegistry };
+}
+
+async function publishComponentAgentRegistration({ natsContext, agentID }) {
+  const subject = createSubject()
+    .env('prod')
+    .ns('component-service')
+    .context('gw-ws-components')
+    .channel('cmd')
+    .entity('componentAgent')
+    .action('register')
+    .version('v1')
+    .id(agentID)
+    .build();
+
+  await natsContext.publish(subject, JSON.stringify({ data: { agentID } }));
 }
 
 async function startConsumer({ streamName, natsContext, diagnostics }) {
@@ -112,6 +135,7 @@ async function startConsumer({ streamName, natsContext, diagnostics }) {
     deliver_policy: DeliverPolicy.All,
     filter_subjects: [
       'prod.component-service.*.*.exec.component.compute_result.v1.>',
+      'prod.component-service.*.*.exec.componentAgent.cmdRegisterProvidingAgentsComponent.v1.>',
     ]
   });
   const c = await jetstream.consumers.get(streamName, consumerName);

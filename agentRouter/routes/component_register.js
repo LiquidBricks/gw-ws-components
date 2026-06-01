@@ -7,46 +7,46 @@ export const path = {
 }
 
 export const spec = {
-  handler: trackProvidedComponentHash,
+  handler: validateComponentRegistration,
   post: [
     publishComponentRegistration,
   ],
 }
 
-function trackProvidedComponentHash({ message, rootCtx: { connectionRegistry, diagnostics } }) {
-  const { connectionId, data: { hash } } = message
-  const connection = connectionRegistry.get(connectionId)
+function validateComponentRegistration({ message, rootCtx: { connectionRegistry, diagnostics } }) {
+  const { agentID, data: { hash } } = message
+  const connection = connectionRegistry.get(agentID)
 
   diagnostics.require(
     connection,
     Codes.PRECONDITION_REQUIRED,
     'Connection missing for component registration',
-    { connectionId }
+    { agentID }
   )
 
   diagnostics.require(
     hash,
     Codes.PRECONDITION_REQUIRED,
     'Component hash is required for registration',
-    { connectionId }
+    { agentID }
   )
 
-  connection.providedComponentHashes.add(hash)
 
-  return { hash }
+  return { hash, agentID }
 }
 
 async function publishComponentRegistration({ message, rootCtx: { natsContext } }) {
-  const [env, ns, tenant, , , , , version, id] = (message?.subject).split('.')
+  const [env, ns, tenant, , , , , version] = (message?.subject).split('.')
 
   const subject = createSubject()
-    .set({ env, ns, tenant, version, id })
+    .set({ env, ns, tenant, version })
+    .id(message.agentID)
     .context('gw-ws-components')
     .channel('cmd')
-    .entity('component')
-    .action('register')
+    .entity('componentAgent')
+    .action('registerComponent')
     .build()
 
-  const payload = { data: message.data }
+  const payload = { data: { agentID: message.agentID, component: message.data } }
   await natsContext.publish(subject, JSON.stringify(payload))
 }

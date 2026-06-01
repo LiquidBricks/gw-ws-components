@@ -1,5 +1,6 @@
 import router from "@liquid-bricks/lib-nats-subject/router";
 import { path as computeResultPath, spec as computeResultSpec } from './routes/compute_result.js'
+import { path as cmdRegisterProvidingAgentsComponentPath, spec as cmdRegisterProvidingAgentsComponentSpec } from './routes/cmd_register_providing_agents_component.js'
 import { Codes } from '../codes.js'
 
 export function createRouter({
@@ -12,6 +13,7 @@ export function createRouter({
     context: { natsContext, diagnostics, connectionRegistry },
   })
     .route(computeResultPath, computeResultSpec)
+    .route(cmdRegisterProvidingAgentsComponentPath, cmdRegisterProvidingAgentsComponentSpec)
     .default({
       handler: async ({ message, rootCtx: { diagnostics } }) => {
         diagnostics.invariant(
