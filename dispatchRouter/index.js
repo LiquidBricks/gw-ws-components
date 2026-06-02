@@ -3,6 +3,11 @@ import { path as computeResultPath, spec as computeResultSpec } from './routes/c
 import { path as cmdRegisterProvidingAgentsComponentPath, spec as cmdRegisterProvidingAgentsComponentSpec } from './routes/cmd_register_providing_agents_component.js'
 import { Codes } from '../codes.js'
 
+export const routes = [
+  [computeResultPath, computeResultSpec],
+  [cmdRegisterProvidingAgentsComponentPath, cmdRegisterProvidingAgentsComponentSpec],
+]
+
 export function createRouter({
   natsContext,
   diagnostics,
@@ -12,8 +17,7 @@ export function createRouter({
     tokens: ['env', 'ns', 'tenant', 'context', 'channel', 'entity', 'action', 'version', 'id'],
     context: { natsContext, diagnostics, connectionRegistry },
   })
-    .route(computeResultPath, computeResultSpec)
-    .route(cmdRegisterProvidingAgentsComponentPath, cmdRegisterProvidingAgentsComponentSpec)
+    .route({}, { children: routes })
     .default({
       handler: async ({ message, rootCtx: { diagnostics } }) => {
         diagnostics.invariant(

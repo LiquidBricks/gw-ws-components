@@ -1,5 +1,8 @@
 import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
 
+import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
+
+
 export const path = {
   context: 'component-agent',
   channel: 'evt',
@@ -11,13 +14,8 @@ export const spec = {
   handler: async ({ message, rootCtx: { natsContext } }) => {
     const { instanceId, result, type, name } = message?.data ?? {}
 
-    const subject = createSubject()
+    const subject = createSubject(natsEvents['*'].component_service['*']['*'].evt.componentInstance.computeResultDone.v1['*'])
       .env('prod')
-      .ns('component-service')
-      .entity('componentInstance')
-      .channel('evt')
-      .action('computeResultDone')
-      .version('v1')
 
     await natsContext.publish(
       subject.build(),

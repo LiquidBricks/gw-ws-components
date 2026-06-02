@@ -6,6 +6,9 @@ import { Codes } from './codes.js';
 import { createRouter as dispatchRouter } from './dispatchRouter/index.js';
 import { createRouter as agentRouter } from './agentRouter/index.js';
 
+import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
+
+
 const consumerName = 'gwWsComponentsConsumer'
 
 export async function gateway({
@@ -102,14 +105,9 @@ export async function gateway({
 }
 
 async function publishComponentAgentRegistration({ natsContext, agentID }) {
-  const subject = createSubject()
+  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.register.v1['*'])
     .env('prod')
-    .ns('component-service')
     .context('gw-ws-components')
-    .channel('cmd')
-    .entity('componentAgent')
-    .action('register')
-    .version('v1')
     .id(agentID)
     .build();
 

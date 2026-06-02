@@ -2,6 +2,9 @@ import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/
 import { decodeData, ackMessage, acknowledgeReceipt } from '../middleware.js'
 import { Codes } from '../../codes.js'
 
+import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
+
+
 export const path = { channel: 'exec', entity: 'component', action: 'compute_result' }
 export const spec = {
   decode: [
@@ -35,33 +38,13 @@ function findProviderForHash({
     { componentHash },
   )
 
-  const subject = createSubject()
+  const subject = createSubject(natsEvents['*'].component_service['*']['*'].exec.component.compute_result.v1['*'])
     .env('prod')
-    .ns('component-service')
-    .entity('component')
-    .channel('exec')
-    .action('compute_result')
-    .version('v1')
     .build()
 
   found.publish(subject, { componentHash, name, type, instanceId, deps })
   return { publish: found.publish }
 }
 
-
-
-async function publishComputedResult({ scope, rootCtx: { natsContext, diagnostics } }) {
-  // const { instanceId, result, type, name } = scope;
-  // const subject = createSubject()
-  //   .env('prod')
-  //   .ns('component-service')
-  //   .entity('componentInstance')
-  //   .channel('evt')
-  //   .action(`computeResultDone`)
-  //   .version('v1');
-
-  // await natsContext.publish(
-  //   subject.build(),
-  //   JSON.stringify({ data: { instanceId, name, type, result } })
-  // );
+async function publishComputedResult() {
 }

@@ -3,6 +3,11 @@ import { path as componentRegisterPath, spec as componentRegisterSpec } from './
 import { path as computeResultDonePath, spec as computeResultDoneSpec } from './routes/computeResultDone.js'
 import { Codes } from '../codes.js'
 
+export const routes = [
+  [componentRegisterPath, componentRegisterSpec],
+  [computeResultDonePath, computeResultDoneSpec],
+]
+
 export function createRouter({
   natsContext,
   diagnostics,
@@ -12,8 +17,7 @@ export function createRouter({
     tokens: ['env', 'ns', 'tenant', 'context', 'channel', 'entity', 'action', 'version', 'id'],
     context: { natsContext, diagnostics, connectionRegistry },
   })
-    .route(componentRegisterPath, componentRegisterSpec)
-    .route(computeResultDonePath, computeResultDoneSpec)
+    .route({}, { children: routes })
     .default({
       handler: ({ message, rootCtx: { diagnostics, connectionRegistry } }) => {
         diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'No handler for subject', { subject: message?.subject })

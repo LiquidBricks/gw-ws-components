@@ -1,5 +1,7 @@
 import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
+import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 import { Codes } from '../../codes.js'
+
 
 export const path = {
   channel: 'cmd', entity: 'component',
@@ -31,20 +33,16 @@ function validateComponentRegistration({ message, rootCtx: { connectionRegistry,
     { agentID }
   )
 
-
   return { hash, agentID }
 }
 
 async function publishComponentRegistration({ message, rootCtx: { natsContext } }) {
-  const [env, ns, tenant, , , , , version] = (message?.subject).split('.')
+  const [env, , tenant] = (message?.subject).split('.')
 
-  const subject = createSubject()
-    .set({ env, ns, tenant, version })
-    .id(message.agentID)
+  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.registerComponent.v1['*'])
+    .set({ env, tenant })
     .context('gw-ws-components')
-    .channel('cmd')
-    .entity('componentAgent')
-    .action('registerComponent')
+    .id(message.agentID)
     .build()
 
   const payload = { data: { agentID: message.agentID, component: message.data } }
