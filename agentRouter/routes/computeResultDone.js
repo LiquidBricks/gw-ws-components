@@ -14,7 +14,7 @@ export const spec = {
   handler: async ({ message, rootCtx: { natsContext } }) => {
     const { instanceId, result, type, name } = message?.data ?? {}
 
-    const subject = createSubject(natsEvents['*'].component_service['*']['*'].evt.componentInstance.computeResultDone.v1['*'])
+    const subject = createSubject(natsEvents['*'].component_service['*']['*'].evt.componentInstance.computeResultDone.v1['*']).forPublish()
       .env('prod')
 
     await natsContext.publish(

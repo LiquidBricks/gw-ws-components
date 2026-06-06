@@ -105,7 +105,7 @@ export async function gateway({
 }
 
 async function publishComponentAgentRegistration({ natsContext, agentID }) {
-  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.register.v1['*'])
+  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.register.v1['*']).forPublish()
     .env('prod')
     .context('gw-ws-components')
     .id(agentID)

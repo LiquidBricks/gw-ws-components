@@ -39,7 +39,7 @@ function validateComponentRegistration({ message, rootCtx: { connectionRegistry,
 async function publishComponentRegistration({ message, rootCtx: { natsContext } }) {
   const [env, , tenant] = (message?.subject).split('.')
 
-  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.registerComponent.v1['*'])
+  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.registerComponent.v1['*']).forPublish()
     .set({ env, tenant })
     .context('gw-ws-components')
     .id(message.agentID)
