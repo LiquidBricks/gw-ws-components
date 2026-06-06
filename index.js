@@ -132,8 +132,8 @@ async function startConsumer({ streamName, natsContext, diagnostics }) {
     ack_policy: AckPolicy.Explicit,
     deliver_policy: DeliverPolicy.All,
     filter_subjects: [
-      'prod.component-service.*.*.exec.component.compute_result.v1.>',
-      'prod.component-service.*.*.exec.componentAgent.cmdRegisterProvidingAgentsComponent.v1.>',
+      createSubject(natsEvents['*'].component_service['*']['*'].exec.component.compute_result.v1['*']).forSubscribe().env('prod').id('>').build(),
+      createSubject(natsEvents['*'].component_service['*']['*'].exec.componentAgent.cmdRegisterProvidingAgentsComponent.v1['*']).forSubscribe().env('prod').id('>').build(),
     ]
   });
   const c = await jetstream.consumers.get(streamName, consumerName);
