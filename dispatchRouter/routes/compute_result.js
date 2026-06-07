@@ -5,7 +5,10 @@ import { Codes } from '../../codes.js'
 import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
 
-export const path = { channel: 'exec', entity: 'component', action: 'compute_result' }
+export const path = createSubject(natsEvents['*'].component_service['*']['*'].exec.component.compute_result.v1['*'])
+  .forSubscribe()
+  .toObject()
+
 export const spec = {
   decode: [
     decodeData(['instanceId', 'deps', 'componentHash', 'name', 'type']),

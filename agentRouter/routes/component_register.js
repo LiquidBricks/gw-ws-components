@@ -3,10 +3,10 @@ import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nat
 import { Codes } from '../../codes.js'
 
 
-export const path = {
-  channel: 'cmd', entity: 'component',
-  action: 'register', context: 'component-agent'
-}
+export const path = createSubject(natsEvents['*'].component_service['*']['*'].cmd.component.register.v1['*'])
+  .forSubscribe()
+  .context('component-agent')
+  .toObject()
 
 export const spec = {
   handler: validateComponentRegistration,

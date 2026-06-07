@@ -1,11 +1,11 @@
 import { decodeData } from '../middleware.js'
 import { Codes } from '../../codes.js'
+import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
+import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
-export const path = {
-  channel: 'exec',
-  entity: 'componentAgent',
-  action: 'cmdRegisterProvidingAgentsComponent',
-}
+export const path = createSubject(natsEvents['*'].component_service['*']['*'].exec.componentAgent.cmdRegisterProvidingAgentsComponent.v1['*'])
+  .forSubscribe()
+  .toObject()
 
 export const spec = {
   decode: [
