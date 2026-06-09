@@ -45,7 +45,11 @@ function findProviderForHash({
     .env('prod')
     .build()
 
-  found.publish(subject, { componentHash, name, type, instanceId, deps })
+  found.publish(
+    subject,
+    { componentHash, name, type, instanceId, deps },
+    { headers: {} }
+  )
   return { publish: found.publish }
 }
 
