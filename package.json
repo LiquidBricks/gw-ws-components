@@ -13,8 +13,8 @@
     "test": "clear && node test/run.js"
   },
   "dependencies": {
-    "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#345a6a5d748e253bee39e3dd1ca33719a35f9ad3",
-    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#ad70a82d59027ee6b2349366f50b14c37f58ef74",
+    "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#756ba42db21d10d311892cd21aa7b56243f6c2c0",
+    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#91d8d79aee3797a332b4d3f4fd0254b9ac727d04",
     "@nats-io/jetstream": "^3.0.2",
     "ws": "^8.18.3"
   },

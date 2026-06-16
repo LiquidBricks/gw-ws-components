@@ -283,7 +283,7 @@ test('compute_result publishes via the provider registered for the component has
   const [{ connectionId, args }] = publishCalls
   assert.equal(connectionId, 2)
   const [subject, payload] = args
-  assert.equal(subject, 'prod.component-service._._.exec.component.compute_result.v1._')
+  assert.equal(subject, 'prod.component-service._.agent.exec.component.compute_result.v1._')
   assert.deepEqual(payload, {
     componentHash: 'hash-two',
     name: 'TestComponent',
@@ -300,7 +300,7 @@ test('dispatch router does not warn when compute_result has no provider register
     diagnostics,
     connectionRegistry: new Map(),
   })
-  const subject = 'prod.component-service._._.exec.component.compute_result.v1._'
+  const subject = 'prod.component-service._.agent-gw.exec.component.compute_result.v1._'
   const requestMessage = {
     subject,
     json() {

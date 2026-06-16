@@ -3,9 +3,8 @@ import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/
 import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
 
-export const path = createSubject(natsEvents['*'].component_service['*']['*'].evt.component.computeResultDone.v1['*'])
+export const path = createSubject(natsEvents['*'].component_service['*'].agent.evt.component.computeResultDone.v1['*'])
   .forSubscribe()
-  .context('component-agent')
   .toObject()
 
 export const spec = {
