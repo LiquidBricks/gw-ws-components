@@ -6,7 +6,7 @@ import { WebSocket } from 'ws'
 import { gateway } from '../index.js'
 import { Codes } from '../codes.js'
 import { spec as componentRegisterSpec } from '../agentRouter/routes/component_register.js'
-import { spec as computeResultSpec } from '../dispatchRouter/routes/compute_result.js'
+import { spec as computeFunctionSpec } from '../dispatchRouter/routes/compute_function.js'
 import { spec as cmdRegisterProvidingAgentsComponentSpec } from '../dispatchRouter/routes/cmd_register_providing_agents_component.js'
 import { createRouter as createDispatchRouter } from '../dispatchRouter/index.js'
 
@@ -45,12 +45,14 @@ function createDiagnosticsStub() {
 
 function createNatsContextStub() {
   const publishCalls = []
+  const consumerAddCalls = []
   const iterator = {
     async *[Symbol.asyncIterator]() { /* no messages for tests */ }
   }
 
   return {
     publishCalls,
+    consumerAddCalls,
     publish: async (...args) => publishCalls.push(args),
     async jetstream() {
       return {
@@ -63,7 +65,7 @@ function createNatsContextStub() {
       return {
         consumers: {
           delete: async () => { },
-          add: async () => { },
+          add: async (...args) => consumerAddCalls.push(args),
         }
       }
     },
@@ -130,6 +132,18 @@ function waitForClose(ws, timeoutMs = DEFAULT_TIMEOUT) {
     ws.once('error', (err) => { clearTimeout(timer); reject(err) })
   })
 }
+
+test('gateway subscribes to compute_function commands', async () => {
+  const { server, natsContext } = await startDispatcher()
+
+  try {
+    assert.equal(natsContext.consumerAddCalls.length, 1)
+    const [, config] = natsContext.consumerAddCalls[0]
+    assert.equal(config.filter_subjects[0], 'prod.gateway.*.*.cmd.component.compute_function.v1.>')
+  } finally {
+    await closeServer(server)
+  }
+})
 
 test('gateway sends an initial connected message', async () => {
   const { server, url } = await startDispatcher()
@@ -262,7 +276,7 @@ test('cmdRegisterProvidingAgentsComponent records provided hashes for the addres
 })
 
 
-test('compute_result publishes via the provider registered for the component hash', async () => {
+test('compute_function publishes via the provider registered for the component hash', async () => {
   const diagnostics = createDiagnosticsStub()
   const publishCalls = []
   const connectionRegistry = new Map([
@@ -277,7 +291,7 @@ test('compute_result publishes via the provider registered for the component has
     type: 'widget',
   }
 
-  await computeResultSpec.pre[0]({ scope, rootCtx: { diagnostics, connectionRegistry } })
+  await computeFunctionSpec.handler({ scope, rootCtx: { diagnostics, connectionRegistry } })
 
   assert.equal(publishCalls.length, 1)
   const [{ connectionId, args }] = publishCalls
@@ -293,14 +307,14 @@ test('compute_result publishes via the provider registered for the component has
   })
 })
 
-test('dispatch router does not warn when compute_result has no provider registered', async () => {
+test('dispatch router does not warn when compute_function has no provider registered', async () => {
   const diagnostics = createDiagnosticsStub()
   const dispatch = createDispatchRouter({
     natsContext: {},
     diagnostics,
     connectionRegistry: new Map(),
   })
-  const subject = 'prod.component-service._.agent-gw.exec.component.compute_result.v1._'
+  const subject = 'prod.gateway._.agent-gw.cmd.component.compute_function.v1._'
   const requestMessage = {
     subject,
     json() {
@@ -328,7 +342,7 @@ test('dispatch router does not warn when compute_result has no provider register
   assert.equal(diagnostics.calls.error.length, 0)
 })
 
-test('compute_result validation fails when no provider has the requested hash', () => {
+test('compute_function validation fails when no provider has the requested hash', () => {
   const diagnostics = createDiagnosticsStub()
   const connectionRegistry = new Map([
     [1, { publish() { }, providedComponentHashes: new Set(['hash-one']) }],
@@ -336,7 +350,7 @@ test('compute_result validation fails when no provider has the requested hash', 
   const scope = { componentHash: 'hash-missing' }
 
   assert.throws(
-    () => computeResultSpec.pre[0]({ scope, rootCtx: { diagnostics, connectionRegistry } }),
+    () => computeFunctionSpec.handler({ scope, rootCtx: { diagnostics, connectionRegistry } }),
     (err) => err instanceof diagnostics.DiagnosticError && err.code === Codes.PRECONDITION_REQUIRED
   )
 })

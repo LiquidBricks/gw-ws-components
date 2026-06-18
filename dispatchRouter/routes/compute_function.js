@@ -1,11 +1,11 @@
 import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/basic'
-import { decodeData, ackMessage, acknowledgeReceipt } from '../middleware.js'
+import { decodeData, ackMessage } from '../middleware.js'
 import { Codes } from '../../codes.js'
 
 import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
 
-export const path = createSubject(natsEvents['*'].component_service['*']['*'].exec.component.compute_result.v1['*'])
+export const path = createSubject(natsEvents['*'].gateway['*']['*'].cmd.component.compute_function.v1['*'])
   .forSubscribe()
   .toObject()
 
@@ -13,21 +13,13 @@ export const spec = {
   decode: [
     decodeData(['instanceId', 'deps', 'componentHash', 'name', 'type']),
   ],
-  pre: [
-    findProviderForHash,
-  ],
   handler,
   post: [
-    publishComputedResult,
     ackMessage,
   ],
 }
 
-function handler() {
-  // No-op: dispatch happens in the pre stage.
-}
-
-function findProviderForHash({
+function handler({
   scope: { componentHash, name, type, instanceId, deps },
   rootCtx: { diagnostics, connectionRegistry },
 }) {
@@ -50,8 +42,4 @@ function findProviderForHash({
     { componentHash, name, type, instanceId, deps },
     { headers: {} }
   )
-  return { publish: found.publish }
-}
-
-async function publishComputedResult() {
 }

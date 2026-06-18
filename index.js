@@ -132,7 +132,7 @@ async function startConsumer({ streamName, natsContext, diagnostics }) {
     ack_policy: AckPolicy.Explicit,
     deliver_policy: DeliverPolicy.All,
     filter_subjects: [
-      createSubject(natsEvents['*'].component_service['*']['*'].exec.component.compute_result.v1['*']).forSubscribe().env('prod').id('>').build(),
+      createSubject(natsEvents['*'].gateway['*']['*'].cmd.component.compute_function.v1['*']).forSubscribe().env('prod').id('>').build(),
       createSubject(natsEvents['*'].component_service['*']['*'].exec.componentAgent.cmdRegisterProvidingAgentsComponent.v1['*']).forSubscribe().env('prod').id('>').build(),
     ]
   });

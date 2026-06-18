@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#756ba42db21d10d311892cd21aa7b56243f6c2c0",
-    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#efe7d457976c213fcb188ceff2b72590203b0f9b",
+    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#a78bb81726e443e72f2b751fe7143024adbda6a7",
     "@nats-io/jetstream": "^3.0.2",
     "ws": "^8.18.3"
   },
