@@ -7,6 +7,7 @@ import { gateway } from '../index.js'
 import { Codes } from '../codes.js'
 import { spec as componentRegisterSpec } from '../agentRouter/routes/component_register.js'
 import { spec as computeFunctionSpec } from '../dispatchRouter/routes/compute_function.js'
+import { spec as functionResultSpec } from '../agentRouter/routes/computeResultDone.js'
 import { spec as cmdRegisterProvidingAgentsComponentSpec } from '../dispatchRouter/routes/cmd_register_providing_agents_component.js'
 import { createRouter as createDispatchRouter } from '../dispatchRouter/index.js'
 
@@ -276,6 +277,31 @@ test('cmdRegisterProvidingAgentsComponent records provided hashes for the addres
 })
 
 
+test('compute_function result republishes to component-service function_result', async () => {
+  const publishCalls = []
+  const data = {
+    instanceId: 'instance-1',
+    name: 'taskA',
+    type: 'task',
+    result: 42,
+  }
+
+  await functionResultSpec.handler({
+    message: { data },
+    rootCtx: {
+      natsContext: {
+        publish: async (...args) => publishCalls.push(args),
+      },
+    },
+  })
+
+  assert.equal(publishCalls.length, 1)
+  const [subject, payload] = publishCalls[0]
+  assert.equal(subject, 'prod.component-service._.function_result.evt.component.compute_function.v1._')
+  assert.deepEqual(JSON.parse(payload), { data })
+})
+
+
 test('compute_function publishes via the provider registered for the component hash', async () => {
   const diagnostics = createDiagnosticsStub()
   const publishCalls = []
@@ -297,7 +323,7 @@ test('compute_function publishes via the provider registered for the component h
   const [{ connectionId, args }] = publishCalls
   assert.equal(connectionId, 2)
   const [subject, payload] = args
-  assert.equal(subject, 'prod.component-service._.agent.exec.component.compute_result.v1._')
+  assert.equal(subject, 'prod.agent._._.cmd.component.compute_function.v1._')
   assert.deepEqual(payload, {
     componentHash: 'hash-two',
     name: 'TestComponent',
