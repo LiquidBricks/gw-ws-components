@@ -297,7 +297,7 @@ test('compute_function result republishes to component-service function_result',
 
   assert.equal(publishCalls.length, 1)
   const [subject, payload] = publishCalls[0]
-  assert.equal(subject, 'prod.component-service._.function_result.evt.component.compute_function.v1._')
+  assert.equal(subject, 'prod.component-service._.function_result.evt.component.compute_function.v1.task')
   assert.deepEqual(JSON.parse(payload), { data })
 })
 

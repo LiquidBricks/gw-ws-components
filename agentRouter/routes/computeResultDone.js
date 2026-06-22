@@ -10,13 +10,39 @@ export const path = createSubject(natsEvents['*'].gateway['*'].function_result.e
 export const spec = {
   handler: async ({ message, rootCtx: { natsContext } }) => {
     const { instanceId, result, type, name } = message?.data ?? {}
+    switch (type) {
+      case 'data': {
+        const subject = createSubject(natsEvents['*'].component_service['*'].function_result.evt.component.compute_function.v1.data).forPublish()
+          .env('prod')
 
-    const subject = createSubject(natsEvents['*'].component_service['*'].function_result.evt.component.compute_function.v1['*']).forPublish()
-      .env('prod')
+        await natsContext.publish(
+          subject.build(),
+          JSON.stringify({ data: { instanceId, name, type, result } })
+        )
+        return
+      }
+      case 'gate': {
+        const subject = createSubject(natsEvents['*'].component_service['*'].function_result.evt.component.compute_function.v1.gate).forPublish()
+          .env('prod')
 
-    await natsContext.publish(
-      subject.build(),
-      JSON.stringify({ data: { instanceId, name, type, result } })
-    )
+        await natsContext.publish(
+          subject.build(),
+          JSON.stringify({ data: { instanceId, name, type, result } })
+        )
+        return
+      }
+      case 'task': {
+        const subject = createSubject(natsEvents['*'].component_service['*'].function_result.evt.component.compute_function.v1.task).forPublish()
+          .env('prod')
+
+        await natsContext.publish(
+          subject.build(),
+          JSON.stringify({ data: { instanceId, name, type, result } })
+        )
+        return
+      }
+      default:
+        throw new TypeError('Unsupported compute_function result type: ' + type)
+    }
   },
 }
