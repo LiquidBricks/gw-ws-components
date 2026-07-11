@@ -9,7 +9,13 @@ export const path = createSubject(natsEvents['*'].gateway['*']['*'].cmd.componen
   .forSubscribe()
   .toObject()
 
+export const emits = {
+  'agent.cmd.component.compute_function.v1':
+    natsEvents['*'].agent['*']['*'].cmd.component.compute_function.v1['*'],
+}
+
 export const spec = {
+  context: { emits },
   decode: [
     decodeData(['instanceId', 'deps', 'componentHash', 'name', 'type']),
   ],
@@ -22,6 +28,7 @@ export const spec = {
 function handler({
   scope: { componentHash, name, type, instanceId, deps },
   rootCtx: { diagnostics, connectionRegistry },
+  routeCtx: { emits },
 }) {
   const found = [...connectionRegistry.values()]
     .find(c => c.providedComponentHashes.has(componentHash));
@@ -33,7 +40,7 @@ function handler({
     { componentHash },
   )
 
-  const subject = createSubject(natsEvents['*'].agent['*']['*'].cmd.component.compute_function.v1['*']).forPublish()
+  const subject = createSubject(emits['agent.cmd.component.compute_function.v1']).forPublish()
     .env('prod')
     .build()
 

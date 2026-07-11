@@ -8,7 +8,13 @@ export const path = createSubject(natsEvents['*'].component_service['*']['*'].cm
   .context('component-agent')
   .toObject()
 
+export const emits = {
+  'component_service.cmd.componentAgent.registerComponent.v1':
+    natsEvents['*'].component_service['*']['*'].cmd.componentAgent.registerComponent.v1['*'],
+}
+
 export const spec = {
+  context: { emits },
   handler: validateComponentRegistration,
   post: [
     publishComponentRegistration,
@@ -36,10 +42,10 @@ function validateComponentRegistration({ message, rootCtx: { connectionRegistry,
   return { hash, agentID }
 }
 
-async function publishComponentRegistration({ message, rootCtx: { natsContext } }) {
+async function publishComponentRegistration({ message, rootCtx: { natsContext }, routeCtx: { emits } }) {
   const [env, , tenant] = (message?.subject).split('.')
 
-  const subject = createSubject(natsEvents['*'].component_service['*']['*'].cmd.componentAgent.registerComponent.v1['*']).forPublish()
+  const subject = createSubject(emits['component_service.cmd.componentAgent.registerComponent.v1']).forPublish()
     .set({ env, tenant })
     .context('gw-ws-components')
     .id(message.agentID)

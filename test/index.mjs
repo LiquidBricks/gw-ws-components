@@ -252,6 +252,7 @@ test('component_register handler publishes componentAgent registration without r
     message,
     scope,
     rootCtx: { natsContext: { publish: async (...args) => publishCalls.push(args) } },
+    routeCtx: componentRegisterSpec.context,
   })
 
   assert.equal(publishCalls.length, 1)
@@ -293,6 +294,7 @@ test('compute_function result republishes to component-service function_result',
         publish: async (...args) => publishCalls.push(args),
       },
     },
+    routeCtx: functionResultSpec.context,
   })
 
   assert.equal(publishCalls.length, 1)
@@ -317,7 +319,11 @@ test('compute_function publishes via the provider registered for the component h
     type: 'widget',
   }
 
-  await computeFunctionSpec.handler({ scope, rootCtx: { diagnostics, connectionRegistry } })
+  await computeFunctionSpec.handler({
+    scope,
+    rootCtx: { diagnostics, connectionRegistry },
+    routeCtx: computeFunctionSpec.context,
+  })
 
   assert.equal(publishCalls.length, 1)
   const [{ connectionId, args }] = publishCalls
@@ -376,7 +382,11 @@ test('compute_function validation fails when no provider has the requested hash'
   const scope = { componentHash: 'hash-missing' }
 
   assert.throws(
-    () => computeFunctionSpec.handler({ scope, rootCtx: { diagnostics, connectionRegistry } }),
+    () => computeFunctionSpec.handler({
+      scope,
+      rootCtx: { diagnostics, connectionRegistry },
+      routeCtx: computeFunctionSpec.context,
+    }),
     (err) => err instanceof diagnostics.DiagnosticError && err.code === Codes.PRECONDITION_REQUIRED
   )
 })
