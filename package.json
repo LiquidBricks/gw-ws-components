@@ -13,6 +13,8 @@
     "test": "clear && node test/run.js"
   },
   "dependencies": {
+    "@liquid-bricks/gw-ws-components-nats-to-ws": "github:LiquidBricks/gw-ws-components-nats-to-ws#44e1162d09ed8bd245c96770a903136488961af8",
+    "@liquid-bricks/gw-ws-components-ws-to-nats": "github:LiquidBricks/gw-ws-components-ws-to-nats#5ba4a0e9f2ee2f655ef3420e3efbe379ad388e76",
     "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#756ba42db21d10d311892cd21aa7b56243f6c2c0",
     "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#c79bce410616813500814e598afeeaea5ebe3216",
     "@nats-io/jetstream": "^3.0.2",

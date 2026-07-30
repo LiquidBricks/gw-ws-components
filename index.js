@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { AckPolicy, DeliverPolicy } from "@nats-io/jetstream";
 import { WebSocketServer } from 'ws';
 import { Codes } from './codes.js';
-import { createNatsIngressRouter } from '../gw-ws-components-nats-to-ws/src/index.js';
-import { createWebSocketIngressRouter } from '../gw-ws-components-ws-to-nats/src/index.js';
+import { createNatsIngressRouter } from '@liquid-bricks/gw-ws-components-nats-to-ws';
+import { createWebSocketIngressRouter } from '@liquid-bricks/gw-ws-components-ws-to-nats';
 
 import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
