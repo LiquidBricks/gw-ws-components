@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { AckPolicy, DeliverPolicy } from "@nats-io/jetstream";
 import { WebSocketServer } from 'ws';
 import { Codes } from './codes.js';
-import { createRouter as dispatchRouter } from './dispatchRouter/index.js';
-import { createRouter as agentRouter } from './agentRouter/index.js';
+import { createNatsIngressRouter } from '../gw-ws-components-nats-to-ws/src/index.js';
+import { createWebSocketIngressRouter } from '../gw-ws-components-ws-to-nats/src/index.js';
 
 import { events as natsEvents } from '@liquid-bricks/lib-nats-subject/events/nats'
 
@@ -28,14 +28,21 @@ export async function gateway({
   const iter = await startConsumer({ streamName, natsContext, diagnostics })
     .catch((error) => diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'gw-ws-components consumer failed to start', { error: error?.message ?? String(error) }))
 
-  const r = dispatchRouter({ natsContext, diagnostics: diagnostics.child({ direction: 'dispatch' }), connectionRegistry })
-  const a = agentRouter({ natsContext, diagnostics: diagnostics.child({ direction: 'agent' }), connectionRegistry })
+  const natsIngressRouter = createNatsIngressRouter({
+    natsContext,
+    diagnostics: diagnostics.child({ direction: 'nats-ingress' }),
+    connectionRegistry,
+  })
+  const webSocketIngressRouter = createWebSocketIngressRouter({
+    natsContext,
+    diagnostics: diagnostics.child({ direction: 'websocket-ingress' }),
+    connectionRegistry,
+  })
 
   if (iter?.[Symbol.asyncIterator]) {
     new Promise(async () => {
       for await (const m of iter) {
-        await r.request({ subject: m.subject, message: m })
-        m.ack()
+        await natsIngressRouter.request({ subject: m.subject, message: m })
       }
     })
   }
@@ -76,7 +83,7 @@ export async function gateway({
         return;
       }
 
-      await a.request({ subject, message: parsed })
+      await webSocketIngressRouter.request({ subject, message: parsed })
 
     });
 
