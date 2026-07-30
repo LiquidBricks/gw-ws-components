@@ -4,7 +4,7 @@ import http from 'node:http'
 import { WebSocket } from 'ws'
 
 import { gateway } from '../index.js'
-import { Codes } from '../codes.js'
+import { PRECONDITION_INVALID } from '@liquid-bricks/lib-diagnostics/codes'
 
 const DEFAULT_TIMEOUT = 5000
 
@@ -170,7 +170,7 @@ test('gateway rejects invalid JSON payloads', async () => {
     assert.equal(response.ok, false)
     assert.equal(response.error, 'Invalid JSON payload')
     assert.ok(
-      diagnostics.calls.warn.some((args) => args[1] === Codes.PRECONDITION_INVALID),
+      diagnostics.calls.warn.some((args) => args[1] === PRECONDITION_INVALID),
       'warn called with PRECONDITION_INVALID'
     )
   } finally {

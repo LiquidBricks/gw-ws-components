@@ -2,7 +2,10 @@ import { create as createSubject } from '@liquid-bricks/lib-nats-subject/create/
 import { randomUUID } from 'node:crypto';
 import { AckPolicy, DeliverPolicy } from "@nats-io/jetstream";
 import { WebSocketServer } from 'ws';
-import { Codes } from './codes.js';
+import {
+  PRECONDITION_INVALID,
+  PRECONDITION_REQUIRED,
+} from '@liquid-bricks/lib-diagnostics/codes';
 import { createNatsIngressRouter } from '@liquid-bricks/gw-ws-components-nats-to-ws';
 import { createWebSocketIngressRouter } from '@liquid-bricks/gw-ws-components-ws-to-nats';
 
@@ -19,14 +22,14 @@ export async function gateway({
   diagnostics: d,
 }) {
   const diagnostics = d.child({ route: 'gw-ws-components' })
-  diagnostics.require(path, Codes.PRECONDITION_REQUIRED, 'path is required', { field: 'path' });
+  diagnostics.require(path, PRECONDITION_REQUIRED, 'path is required', { field: 'path' });
   const wss = new WebSocketServer({ server, path });
   const connectionRegistry = new Map();
 
-  diagnostics.require(wss, Codes.PRECONDITION_REQUIRED, 'wss is required', { field: 'wss' });
+  diagnostics.require(wss, PRECONDITION_REQUIRED, 'wss is required', { field: 'wss' });
 
   const iter = await startConsumer({ streamName, natsContext, diagnostics })
-    .catch((error) => diagnostics.warn(false, Codes.PRECONDITION_INVALID, 'gw-ws-components consumer failed to start', { error: error?.message ?? String(error) }))
+    .catch((error) => diagnostics.warn(false, PRECONDITION_INVALID, 'gw-ws-components consumer failed to start', { error: error?.message ?? String(error) }))
 
   const natsIngressRouter = createNatsIngressRouter({
     natsContext,
@@ -66,7 +69,7 @@ export async function gateway({
       try {
         parsed = { ...JSON.parse(raw), agentID };
       } catch (error) {
-        connectionDiagnostics.warn(false, Codes.PRECONDITION_INVALID,
+        connectionDiagnostics.warn(false, PRECONDITION_INVALID,
           'gw-ws-components received invalid JSON', {
           raw,
           error: error?.message ?? String(error),
@@ -78,7 +81,7 @@ export async function gateway({
       const { subject } = parsed;
 
       if (typeof subject !== 'string' || subject.length === 0) {
-        connectionDiagnostics.warn(false, Codes.PRECONDITION_INVALID, 'gw-ws-components received message without subject', { subject });
+        connectionDiagnostics.warn(false, PRECONDITION_INVALID, 'gw-ws-components received message without subject', { subject });
         ws.send(JSON.stringify({ ok: false, error: 'gw-ws-components does not serve components' }));
         return;
       }
@@ -94,7 +97,7 @@ export async function gateway({
 
     ws.on('error', (err) => connectionDiagnostics.warn(
       false,
-      Codes.PRECONDITION_INVALID,
+      PRECONDITION_INVALID,
       'gw-ws-components socket error',
       { error: err?.message ?? String(err) },
     ));
@@ -102,7 +105,7 @@ export async function gateway({
     try {
       await publishComponentAgentRegistration({ natsContext, agentID });
     } catch (error) {
-      connectionDiagnostics.warn(false, Codes.PRECONDITION_INVALID, 'componentAgent registration publish failed', { error: error?.message ?? String(error) });
+      connectionDiagnostics.warn(false, PRECONDITION_INVALID, 'componentAgent registration publish failed', { error: error?.message ?? String(error) });
     }
 
     ws.send(JSON.stringify({ ok: true, message: 'gw-ws-components connected' }));
@@ -122,8 +125,8 @@ async function publishComponentAgentRegistration({ natsContext, agentID }) {
 }
 
 async function startConsumer({ streamName, natsContext, diagnostics }) {
-  diagnostics.require(streamName, Codes.PRECONDITION_REQUIRED, 'streamName is required', { field: 'streamName' });
-  diagnostics.require(natsContext, Codes.PRECONDITION_REQUIRED, 'connection is required', { field: 'natsContext' });
+  diagnostics.require(streamName, PRECONDITION_REQUIRED, 'streamName is required', { field: 'streamName' });
+  diagnostics.require(natsContext, PRECONDITION_REQUIRED, 'connection is required', { field: 'natsContext' });
 
   const jetstream = await natsContext.jetstream();
   const jetstreamManager = await natsContext.jetstreamManager()
