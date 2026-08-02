@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@liquid-bricks/lib-diagnostics": "github:LiquidBricks/lib-diagnostics#2eb9d8e992f1fa656386877c8ff65adbdd2f651e",
-    "@liquid-bricks/gw-ws-components-nats-to-ws": "github:LiquidBricks/gw-ws-components-nats-to-ws#5cdfbfd55a636258575063674b4379b676ad6bbb",
-    "@liquid-bricks/gw-ws-components-ws-to-nats": "github:LiquidBricks/gw-ws-components-ws-to-nats#b6a0cd6984a2fd996f27dd57f62efdc40913e2e9",
+    "@liquid-bricks/gw-ws-components-nats-to-ws": "github:LiquidBricks/gw-ws-components-nats-to-ws#dfc04d2e92ebbc7a8b38322d1143bf55885b1195",
+    "@liquid-bricks/gw-ws-components-ws-to-nats": "github:LiquidBricks/gw-ws-components-ws-to-nats#39877d1e722ed96dad00f637df9fbdab22edcaca",
     "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#756ba42db21d10d311892cd21aa7b56243f6c2c0",
-    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#c79bce410616813500814e598afeeaea5ebe3216",
+    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#d5439e7739ae375c166ee0ca9e9a9013816d95dc",
     "@nats-io/jetstream": "^3.0.2",
     "ws": "^8.18.3"
   },
