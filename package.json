@@ -13,11 +13,11 @@
     "test": "clear && node test/run.js"
   },
   "dependencies": {
-    "@liquid-bricks/lib-diagnostics": "github:LiquidBricks/lib-diagnostics#c55d79973df6a7d7255a0cb521aa8a3dc5182199",
-    "@liquid-bricks/gw-ws-components-nats-to-ws": "github:LiquidBricks/gw-ws-components-nats-to-ws#6e902dcdd9e88fe9936280dea82889d83c920131",
-    "@liquid-bricks/gw-ws-components-ws-to-nats": "github:LiquidBricks/gw-ws-components-ws-to-nats#20a81baef6b38e462cb808b02c3c05afedd3f82a",
-    "@liquid-bricks/lib-nats-context": "github:LiquidBricks/lib-nats-context#756ba42db21d10d311892cd21aa7b56243f6c2c0",
-    "@liquid-bricks/lib-nats-subject": "github:LiquidBricks/lib-nats-subject#96c18b90fb7026ffda49ed82f8c367cecc8cecbc",
+    "@liquid-bricks/lib-diagnostics": "file:../lib-diagnostics",
+    "@liquid-bricks/gw-ws-components-nats-to-ws": "file:../gw-ws-components-nats-to-ws",
+    "@liquid-bricks/gw-ws-components-ws-to-nats": "file:../gw-ws-components-ws-to-nats",
+    "@liquid-bricks/lib-nats-context": "file:../lib-nats-context",
+    "@liquid-bricks/lib-nats-subject": "file:../lib-nats-subject",
     "@nats-io/jetstream": "^3.0.2",
     "ws": "^8.18.3"
   },
